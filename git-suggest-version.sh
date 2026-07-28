@@ -138,10 +138,55 @@ fi
 # ------------------------------------------------------------------------------
 # 5. Calculate Next Version Tag
 # ------------------------------------------------------------------------------
+
+# Handle initial repositories (0.0.0 / v0.0.0) as a minor bump vs patch
+if [[ ("$MAJOR" -eq 0 && "$MINOR" -eq 0 && "$PATCH" -eq 0) && "$BUMP" == "patch" ]]; then
+  BUMP="minor"
+  REASON="Initial release baseline (no previous tags found)."
+fi
+
 NEW_MAJOR="$MAJOR"
 NEW_MINOR="$MINOR"
 NEW_PATCH="$PATCH"
 
+case "$BUMP" in
+  major)
+    NEW_MAJOR=$((MAJOR + 1))
+    NEW_MINOR=0
+    NEW_PATCH=0
+    ;;
+  minor)
+    NEW_MINOR=$((MINOR + 1))
+    NEW_PATCH=0
+    ;;
+  patch)
+    NEW_PATCH=$((PATCH + 1))
+    ;;
+esac
+
+PREFIX=""
+if [[ "$LATEST_TAG" =~ ^v ]]; then
+  PREFIX="v"
+fi
+
+NEXT_TAG="${PREFIX}${NEW_MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+
+# ------------------------------------------------------------------------------
+# 5. Calculate Next Version Tag
+# ------------------------------------------------------------------------------
+
+# First, override BUMP if baseline is 0.0.0
+if [[ ("$MAJOR" -eq 0 && "$MINOR" -eq 0 && "$PATCH" -eq 0) && "$BUMP" == "patch" ]]; then
+  BUMP="minor"
+  REASON="Initial release baseline (no previous tags found)."
+fi
+
+# Initialize variables
+NEW_MAJOR="$MAJOR"
+NEW_MINOR="$MINOR"
+NEW_PATCH="$PATCH"
+
+# Calculate based on the updated BUMP
 case "$BUMP" in
   major)
     NEW_MAJOR=$((MAJOR + 1))
